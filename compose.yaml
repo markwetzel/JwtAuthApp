@@ -1,0 +1,6 @@
+﻿services:
+  jwtauthapp:
+    image: jwtauthapp
+    build:
+      context: .
+      dockerfile: JwtAuthApp/Dockerfile

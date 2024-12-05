@@ -1,0 +1,28 @@
+﻿# Ignore user-specific settings
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Build output directories
+bin/
+obj/
+Debug/
+Release/
+
+# Rider and IntelliJ IDEA settings
+.idea/
+*.iml
+
+# Visual Studio specific
+.vscode/
+*.vs/
+*.csproj.user
+
+# Logs and other system files
+*.log
+*.DS_Store
+Thumbs.db
+
+# Docker-related files
+docker-compose.override.yml
