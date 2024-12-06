@@ -10,11 +10,12 @@ public static class JwtHelper
     private const string SecretKey = "pGMiSLLGjzkYgjZ1yWzgbTCckI7qzGljMy2UFXoextY=";
     private static readonly SymmetricSecurityKey SigningKey = new(Encoding.UTF8.GetBytes(SecretKey));
 
-    public static string GenerateToken(string username)
+    public static string GenerateToken(string username, string role)
     {
         var claims = new[]
         {
             new Claim(JwtRegisteredClaimNames.Sub, username),
+            new Claim(ClaimTypes.Role, role),
             new Claim(ClaimTypes.Name, username),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new Claim(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(),
@@ -40,8 +41,8 @@ public static class JwtHelper
 
         var validationParameters = new TokenValidationParameters
         {
-            ValidateIssuer = false,
-            ValidateAudience = false,
+            ValidateIssuer = true,
+            ValidateAudience = true,
             ValidateLifetime = false,
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = SigningKey,

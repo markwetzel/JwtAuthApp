@@ -11,13 +11,15 @@ public static class Database
         using var connection = new SqliteConnection(ConnectionString);
         connection.Open();
 
-        var tableCommand = $"""
-                    CREATE TABLE IF NOT EXISTS users (
-                        id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        username TEXT NOT NULL UNIQUE,
-                        password TEXT NOT NULL
-                    );    
-        """;
+        const string tableCommand =
+            $"""
+                  CREATE TABLE IF NOT EXISTS users (
+                      id INTEGER PRIMARY KEY AUTOINCREMENT,
+                      username TEXT NOT NULL UNIQUE,
+                      password TEXT NOT NULL,
+                      role TEXT DEFAULT 'User'
+                  );    
+             """;
 
         using var createTable = new SqliteCommand(tableCommand, connection);
         createTable.ExecuteNonQuery();

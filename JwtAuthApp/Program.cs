@@ -22,7 +22,7 @@ while (true)
             break;
         case "2":
             ListUsers();
-            break;    
+            break;
         case "3":
             Login();
             break;
@@ -42,26 +42,31 @@ void AddUser()
 
     Console.Write("Enter password: ");
     var password = Console.ReadLine();
-    
+
+    Console.Write("Enter role: ");
+    var role = Console.ReadLine();
+
     // Hash password
     var hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
 
     using var connection = Database.GetConnection();
     connection.Open();
-    
-    var insertCommand = $"""
-        INSERT INTO users (username, password)
-        VALUES ($username, $password);
-    """;
+
+    const string insertCommand =
+        $"""
+             INSERT INTO users (username, password, role)
+             VALUES ($username, $password, $role);
+         """;
 
     using var command = new SqliteCommand(insertCommand, connection);
     command.Parameters.AddWithValue("$username", username);
     command.Parameters.AddWithValue("$password", hashedPassword);
+    command.Parameters.AddWithValue("role", role);
 
     try
     {
         command.ExecuteNonQuery();
-        Console.WriteLine("User added successfully!");
+        Console.WriteLine($"User {username} with role {role} added successfully!");
     }
     catch (Exception e)
     {
@@ -74,7 +79,7 @@ void ListUsers()
     using var connection = Database.GetConnection();
     connection.Open();
 
-    var selectCommand = "SELECT id, username FROM users";
+    var selectCommand = "SELECT id, username, role FROM users";
 
     using var command = new SqliteCommand(selectCommand, connection);
     using var reader = command.ExecuteReader();
@@ -82,7 +87,7 @@ void ListUsers()
     Console.WriteLine("\n--- Users ---");
     while (reader.Read())
     {
-        Console.WriteLine($"ID: {reader.GetInt32(0)}, Username: {reader.GetString(1)}");
+        Console.WriteLine($"ID: {reader.GetInt32(0)}, Username: {reader.GetString(1)}, Role: {reader.GetString(2)}");
     }
 }
 
@@ -97,22 +102,27 @@ void Login()
     using var connection = Database.GetConnection();
     connection.Open();
 
-    var query = "SELECT password FROM users WHERE username = $username";
+    const string query =
+        """SELECT password, role FROM users WHERE username = $username""";
     using var command = new SqliteCommand(query, connection);
     command.Parameters.AddWithValue("$username", username);
 
-    var storedPassword = command.ExecuteScalar() as string;
+    using var reader = command.ExecuteReader();
+    if (reader.Read())
+    {
+        var storedPassword = reader.GetString(0);
+        var role = reader.GetString(1);
 
-    if (storedPassword != null && BCrypt.Net.BCrypt.Verify(password,storedPassword))
-    {
-        var token = JwtHelper.GenerateToken(username);
-        Console.WriteLine("\nLogin successful! Here is your token:");
-        Console.WriteLine(token);
+        if (BCrypt.Net.BCrypt.Verify(password, storedPassword))
+        {
+            var token = JwtHelper.GenerateToken(username, role);
+            Console.WriteLine("\nLogin successful! Here is your token:");
+            Console.WriteLine(token);
+            return;
+        }
     }
-    else
-    {
-        Console.WriteLine("Invalid username or password.");
-    }
+
+    Console.WriteLine("Invalid username or password.");
 }
 
 void ValidateToken()
