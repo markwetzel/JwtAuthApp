@@ -29,6 +29,43 @@ while (true)
         case "4":
             ValidateToken();
             break;
+        case "5":
+            RefreshToken();
+
+            void RefreshToken()
+            {
+                Console.Write("Enter username: ");
+                var username = Console.ReadLine();
+
+                Console.WriteLine("Enter refresh token: ");
+                var refreshToken = Console.ReadLine();
+
+                using var connection = Database.GetConnection();
+                connection.Open();
+
+                var query = "SELECT refresh_token, role FROM users WHERE username = $username";
+                using var command = new SqliteCommand(query, connection);
+                command.Parameters.AddWithValue("$username", username);
+
+                using var reader = command.ExecuteReader();
+                if (reader.Read())
+                {
+                    var storedToken = reader.GetString(0);
+                    var role = reader.GetString(1);
+
+                    if (storedToken == refreshToken)
+                    {
+                        var newToken = JwtHelper.GenerateToken(username, role);
+                        Console.WriteLine("\nNew JWT Token:");
+                        Console.WriteLine(newToken);
+                        return;
+                    }
+                }
+
+                Console.WriteLine("Invalid refresh token.");
+            }
+
+            break;
         case "0":
             Console.WriteLine("Exiting. Goodbye.");
             break;
@@ -116,8 +153,24 @@ void Login()
         if (BCrypt.Net.BCrypt.Verify(password, storedPassword))
         {
             var token = JwtHelper.GenerateToken(username, role);
-            Console.WriteLine("\nLogin successful! Here is your token:");
+
+            var refreshToken = Guid.NewGuid().ToString();
+
+            var updateCommand =
+                """
+                UPDATE users SET refresh_token = $refreshToken 
+                WHERE username = $username
+                """;
+            using var updateCmd = new SqliteCommand(updateCommand, connection);
+            updateCmd.Parameters.AddWithValue("$refreshToken", refreshToken);
+            updateCmd.Parameters.AddWithValue("$username", username);
+            updateCmd.ExecuteNonQuery();
+            
+            Console.WriteLine("\nLogin successful!");
+            Console.WriteLine("JWT Token:");
             Console.WriteLine(token);
+            Console.WriteLine("\nRefresh Token:");
+            Console.WriteLine(refreshToken);
             return;
         }
     }

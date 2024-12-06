@@ -17,7 +17,8 @@ public static class Database
                       id INTEGER PRIMARY KEY AUTOINCREMENT,
                       username TEXT NOT NULL UNIQUE,
                       password TEXT NOT NULL,
-                      role TEXT DEFAULT 'User'
+                      role TEXT DEFAULT 'User',
+                      refresh_token TEXT;
                   );    
              """;
 
