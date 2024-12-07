@@ -10,6 +10,7 @@ while (true)
     Console.WriteLine("2. List Users");
     Console.WriteLine("3. Login and Generate Token");
     Console.WriteLine("4. Validate Token");
+    Console.WriteLine("5. Refresh Token");
     Console.WriteLine("0. Exit");
     Console.WriteLine("Select an option: ");
 
@@ -31,40 +32,6 @@ while (true)
             break;
         case "5":
             RefreshToken();
-
-            void RefreshToken()
-            {
-                Console.Write("Enter username: ");
-                var username = Console.ReadLine();
-
-                Console.WriteLine("Enter refresh token: ");
-                var refreshToken = Console.ReadLine();
-
-                using var connection = Database.GetConnection();
-                connection.Open();
-
-                var query = "SELECT refresh_token, role FROM users WHERE username = $username";
-                using var command = new SqliteCommand(query, connection);
-                command.Parameters.AddWithValue("$username", username);
-
-                using var reader = command.ExecuteReader();
-                if (reader.Read())
-                {
-                    var storedToken = reader.GetString(0);
-                    var role = reader.GetString(1);
-
-                    if (storedToken == refreshToken)
-                    {
-                        var newToken = JwtHelper.GenerateToken(username, role);
-                        Console.WriteLine("\nNew JWT Token:");
-                        Console.WriteLine(newToken);
-                        return;
-                    }
-                }
-
-                Console.WriteLine("Invalid refresh token.");
-            }
-
             break;
         case "0":
             Console.WriteLine("Exiting. Goodbye.");
@@ -193,4 +160,37 @@ void ValidateToken()
     {
         Console.WriteLine("Invalid or expired token.");
     }
+}
+
+void RefreshToken()
+{
+    Console.Write("Enter username: ");
+    var username = Console.ReadLine();
+
+    Console.WriteLine("Enter refresh token: ");
+    var refreshToken = Console.ReadLine();
+
+    using var connection = Database.GetConnection();
+    connection.Open();
+
+    var query = "SELECT refresh_token, role FROM users WHERE username = $username";
+    using var command = new SqliteCommand(query, connection);
+    command.Parameters.AddWithValue("$username", username);
+
+    using var reader = command.ExecuteReader();
+    if (reader.Read())
+    {
+        var storedToken = reader.GetString(0);
+        var role = reader.GetString(1);
+
+        if (storedToken == refreshToken)
+        {
+            var newToken = JwtHelper.GenerateToken(username, role);
+            Console.WriteLine("\nNew JWT Token:");
+            Console.WriteLine(newToken);
+            return;
+        }
+    }
+
+    Console.WriteLine("Invalid refresh token.");
 }

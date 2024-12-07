@@ -18,7 +18,7 @@ public static class Database
                       username TEXT NOT NULL UNIQUE,
                       password TEXT NOT NULL,
                       role TEXT DEFAULT 'User',
-                      refresh_token TEXT;
+                      refresh_token TEXT
                   );    
              """;
 

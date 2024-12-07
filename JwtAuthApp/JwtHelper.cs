@@ -19,7 +19,9 @@ public static class JwtHelper
             new Claim(ClaimTypes.Name, username),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new Claim(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(),
-                ClaimValueTypes.Integer64)
+                ClaimValueTypes.Integer64),
+            new Claim(JwtRegisteredClaimNames.Iss, "JwtAuthApp"),
+            new Claim(JwtRegisteredClaimNames.Aud, "JwtAuthAppUsers")
         };
         
         var tokenDescriptor = new SecurityTokenDescriptor
@@ -43,10 +45,12 @@ public static class JwtHelper
         {
             ValidateIssuer = true,
             ValidateAudience = true,
-            ValidateLifetime = false,
+            ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = SigningKey,
-            ClockSkew = TimeSpan.Zero
+            ClockSkew = TimeSpan.Zero,
+            ValidIssuer = "JwtAuthApp",
+            ValidAudience = "JwtAuthAppUsers"
         };
 
         try
