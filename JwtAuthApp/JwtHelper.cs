@@ -15,6 +15,7 @@ public static class JwtHelper
         var claims = new[]
         {
             new Claim(JwtRegisteredClaimNames.Sub, username),
+            new Claim("role", role),
             new Claim(ClaimTypes.Role, role),
             new Claim(ClaimTypes.Name, username),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
@@ -37,6 +38,12 @@ public static class JwtHelper
         return tokenHandler.WriteToken(token);
     }
 
+    public static bool IsInRole(ClaimsPrincipal principal, string role)
+    {
+        var claim = principal?.FindFirst("role");
+        return claim?.Value == role; 
+    }
+    
     public static ClaimsPrincipal? ValidateToken(string token)
     {
         var tokenHandler = new JwtSecurityTokenHandler();

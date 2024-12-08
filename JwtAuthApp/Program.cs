@@ -11,6 +11,7 @@ while (true)
     Console.WriteLine("3. Login and Generate Token");
     Console.WriteLine("4. Validate Token");
     Console.WriteLine("5. Refresh Token");
+    Console.WriteLine("6. Admin Panel (Admin Only)");
     Console.WriteLine("0. Exit");
     Console.WriteLine("Select an option: ");
 
@@ -33,9 +34,12 @@ while (true)
         case "5":
             RefreshToken();
             break;
+        case "6":
+            AdminPanel();
+            break;
         case "0":
             Console.WriteLine("Exiting. Goodbye.");
-            break;
+            break; // TODO
     }
 }
 
@@ -132,7 +136,7 @@ void Login()
             updateCmd.Parameters.AddWithValue("$refreshToken", refreshToken);
             updateCmd.Parameters.AddWithValue("$username", username);
             updateCmd.ExecuteNonQuery();
-            
+
             Console.WriteLine("\nLogin successful!");
             Console.WriteLine("JWT Token:");
             Console.WriteLine(token);
@@ -193,4 +197,25 @@ void RefreshToken()
     }
 
     Console.WriteLine("Invalid refresh token.");
+}
+
+void AdminPanel()
+{
+    Console.Write("Enter token: ");
+    var token = Console.ReadLine();
+
+    var principal = JwtHelper.ValidateToken(token);
+    if (principal == null)
+    {
+        Console.WriteLine("Invalid or expired token");
+        return;
+    }
+
+    if (!JwtHelper.IsInRole(principal, "admin"))
+    {
+        Console.WriteLine("Access denied. Admins only!");
+        return;
+    }
+
+    Console.WriteLine("Welcome to the Admin Panel...");
 }
