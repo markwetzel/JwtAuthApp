@@ -3,7 +3,8 @@ using Microsoft.Data.Sqlite;
 
 Database.Initialize();
 
-while (true)
+var isAppRunning = true;
+while (isAppRunning)
 {
     Console.WriteLine("\n--- User Management CLI ---");
     Console.WriteLine("1. Add User");
@@ -39,7 +40,8 @@ while (true)
             break;
         case "0":
             Console.WriteLine("Exiting. Goodbye.");
-            break; // TODO
+            isAppRunning = false;
+            break;
     }
 }
 
