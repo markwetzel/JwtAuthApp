@@ -15,12 +15,10 @@ public static class JwtHelper
         var claims = new[]
         {
             new Claim(JwtRegisteredClaimNames.Sub, username),
-            new Claim("role", role),
-            new Claim(ClaimTypes.Role, role),
+            new Claim(ClaimTypes.Role, role), 
             new Claim(ClaimTypes.Name, username),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new Claim(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(),
-                ClaimValueTypes.Integer64),
+            new Claim(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64),
             new Claim(JwtRegisteredClaimNames.Iss, "JwtAuthApp"),
             new Claim(JwtRegisteredClaimNames.Aud, "JwtAuthAppUsers")
         };
@@ -40,7 +38,7 @@ public static class JwtHelper
 
     public static bool IsInRole(ClaimsPrincipal principal, string role)
     {
-        var claim = principal?.FindFirst("role");
+        var claim = principal?.FindFirst(ClaimTypes.Role);
         return claim?.Value == role; 
     }
     
